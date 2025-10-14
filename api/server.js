@@ -29,6 +29,11 @@ const JWT_SECRET = 'your-secret-key';
 app.use(express.json());
 app.use(express.static('.'));
 
+// Главная страница
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
 // Регистрация
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;

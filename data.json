@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2b$10$dummy"
+    },
+    {
+      "id": 2,
+      "username": "admin2",
+      "password": "$2b$10$dlP.PPSbcknH0DXJ9q6ibOrz.qxofTKEER4B04PjNwJc0c5vyCpsC"
+    }
+  ],
+  "messages": [],
+  "userStars": {
+    "admin2": 1337
+  }
+}

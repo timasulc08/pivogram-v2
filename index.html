@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мессенджер с авторизацией</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007aff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -63,6 +67,32 @@
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-app {
+                overflow-x: hidden;
+            }
+            
+            .sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                top: 0;
+                height: 100vh;
+                width: 80vw;
+                max-width: 320px;
+                z-index: 1000;
+                background: rgba(28, 28, 30, 0.98);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .user-info {
+                padding-left: 70px;
+            }
         }
         
         .sidebar-header {
@@ -1083,6 +1113,39 @@
             display: none;
         }
         
+        .menu-btn {
+            display: none;
+            position: fixed;
+            top: 110px;
+            left: 16px;
+            background: rgba(0, 122, 255, 0.9);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
         @media (max-width: 768px) {
             .chat-app {
                 width: 100vw;
@@ -1091,36 +1154,57 @@
                 border: none;
             }
             
-            .sidebar {
-                width: 280px;
-                min-width: 280px;
+            .main-chat {
+                width: 100%;
+            }
+            
+            .menu-btn {
+                display: block;
             }
         }
         
         @media (max-width: 480px) {
             body {
                 padding: 0;
+                overflow-x: hidden;
             }
             
             .container {
-                max-width: none;
-                border-radius: 20px;
-            }
-            
-            .auth-form {
-                padding: 24px 20px;
-            }
-            
-            .chat-app {
                 width: 100vw;
                 height: 100vh;
                 border-radius: 0;
                 border: none;
             }
             
+            .auth-form {
+                padding: 20px;
+            }
+            
             .sidebar {
-                width: 250px;
-                min-width: 250px;
+                width: 85%;
+                max-width: 280px;
+            }
+            
+            .gift-panel {
+                width: 95%;
+                max-width: 95%;
+            }
+            
+            .gift-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .admin-panel {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .admin-toggle, .disco-btn, .hammer-btn {
+                padding: 8px 12px;
+                font-size: 11px;
+                border-radius: 8px;
+                min-width: auto;
             }
         }
     </style>
@@ -1133,65 +1217,81 @@
                 <h1>💬 Мессенджер</h1>
             </div>
             
-            <div style="display: flex; gap: 20px; margin: 20px;">
-                <!-- Левая панель - Последние обновления -->
-                <div style="flex: 2; background: rgba(44, 44, 46, 0.6); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 style="color: #ffffff; margin: 0 0 15px 0; font-size: 18px; text-align: center;">🆕 Последние обновления v2.0</h3>
-                    <table style="width: 100%; color: rgba(255, 255, 255, 0.9); font-size: 14px; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0; width: 40px;">⭐</td>
-                            <td style="padding: 8px 0;">Система звезд и подарков</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0;">👑</td>
-                            <td style="padding: 8px 0;">Раздача звезд админом</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0;">🎁</td>
-                            <td style="padding: 8px 0;">Подарки с анимацией</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0;">📞</td>
-                            <td style="padding: 8px 0;">Голосовые звонки</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0;">🕺</td>
-                            <td style="padding: 8px 0;">Дискотека с настройками</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0;">🔨</td>
-                            <td style="padding: 8px 0;">Режим молота</td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-                            <td style="padding: 8px 0;">💬</td>
-                            <td style="padding: 8px 0;">Личные сообщения</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0;">💾</td>
-                            <td style="padding: 8px 0;">Сохранение данных</td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <!-- Правая панель - Предыдущие версии -->
-                <div style="flex: 1; background: rgba(44, 44, 46, 0.6); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 style="color: #ffffff; margin: 0 0 15px 0; font-size: 16px; text-align: center;">📅 Предыдущие версии</h3>
-                    <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px; line-height: 1.6;">
-                        <div style="margin-bottom: 12px; padding: 8px; background: rgba(0, 122, 255, 0.1); border-radius: 8px;">
-                            <div style="font-weight: 600; color: #007aff;">v1.5</div>
-                            <div>Авторизация и чат</div>
+            <div style="text-align: center; margin: 20px;">
+                <button id="updatesBtn" style="padding: 16px 32px; background: linear-gradient(135deg, #007aff, #5856d6); color: white; border: none; border-radius: 16px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s ease; box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);" onmouseover="this.style.transform='scale(0.95)'" onmouseout="this.style.transform='scale(1)'">📋 Обновления</button>
+            </div>
+            <!-- Панель обновлений для логина -->
+            <div id="updatesOverlay"
+                style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center;">
+                <div style="width: 80%; max-width: 800px; position: relative; background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); animation: slideUp 0.3s ease;">
+                    <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center;">
+                        <div style="text-align: center; font-size: 10px; color: #808080; margin-bottom: 5px;">CLOSED ALPHA 0.2</div>
+                        <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 600;">📋 Обновления</h3>
+                        <button onclick="document.getElementById('updatesOverlay').style.display='none'" style="background: rgba(255, 255, 255, 0.1); border: none; color: rgba(255, 255, 255, 0.7); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">✕</button>
+                    </div>
+                    <div style="display: flex; gap: 20px; padding: 20px 24px;">
+                        <div style="flex: 2;">
+                            <h4 style="color: #ffffff; margin: 0 0 15px 0; font-size: 16px; text-align: center;">🆕 Последние обновления v2.0</h4>
+                            <table style="width: 100%; color: rgba(255, 255, 255, 0.9); font-size: 14px; border-collapse: collapse;">
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0; width: 40px;">⭐</td>
+                                    <td style="padding: 8px 0;">Система звезд и подарков</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0;">👑</td>
+                                    <td style="padding: 8px 0;">Раздача звезд админом</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0;">🎁</td>
+                                    <td style="padding: 8px 0;">Подарки с анимацией</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0;">📞</td>
+                                    <td style="padding: 8px 0;">Голосовые звонки</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0;">🕺</td>
+                                    <td style="padding: 8px 0;">Дискотека с настройками</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0;">🔨</td>
+                                    <td style="padding: 8px 0;">Режим молота</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="padding: 8px 0;">💬</td>
+                                    <td style="padding: 8px 0;">Личные сообщения</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0;">💾</td>
+                                    <td style="padding: 8px 0;">Сохранение данных</td>
+                                </tr>
+                            </table>
                         </div>
-                        <div style="margin-bottom: 12px; padding: 8px; background: rgba(255, 149, 0, 0.1); border-radius: 8px;">
-                            <div style="font-weight: 600; color: #ff9500;">v1.0</div>
-                            <div>Основной чат</div>
-                        </div>
-                        <div style="margin-bottom: 12px; padding: 8px; background: rgba(52, 199, 89, 0.1); border-radius: 8px;">
-                            <div style="font-weight: 600; color: #34c759;">v0.5</div>
-                            <div>Прототип</div>
+                        <div style="flex: 1;">
+                            <h4 style="color: #ffffff; margin: 0 0 15px 0; font-size: 14px; text-align: center;">📅 Предыдущие версии</h4>
+                            <div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; line-height: 1.6;">
+                                <div style="margin-bottom: 10px; padding: 6px; background: rgba(0, 122, 255, 0.1); border-radius: 6px;">
+                                    <div style="font-weight: 600; color: #007aff;">v1.5</div>
+                                    <div>Авторизация и чат</div>
+                                </div>
+                                <div style="margin-bottom: 10px; padding: 6px; background: rgba(255, 149, 0, 0.1); border-radius: 6px;">
+                                    <div style="font-weight: 600; color: #ff9500;">v1.0</div>
+                                    <div>Основной чат</div>
+                                </div>
+                                <div style="margin-bottom: 10px; padding: 6px; background: rgba(52, 199, 89, 0.1); border-radius: 6px;">
+                                    <div style="font-weight: 600; color: #34c759;">v0.5</div>
+                                    <div>Прототип</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <script>
+                document.getElementById('updatesBtn').onclick = function() {
+                    document.getElementById('updatesOverlay').style.display = 'flex';
+                };
+            </script>
             
             <div class="auth-form">
                 <div class="form-group">
@@ -1240,6 +1340,10 @@
                         <div class="users-list" id="usersList"></div>
                     </div>
                 </div>
+                
+                <!-- Кнопка меню и overlay -->
+                <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+                <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
                 
                 <!-- Основной чат -->
                 <div class="main-chat">
@@ -1479,6 +1583,15 @@
         </div>
     </div>
     
+    <script>
+        function showUpdatesPanel() {
+            document.getElementById('updatesOverlay').style.display = 'flex';
+        }
+        
+        function hideUpdatesPanel() {
+            document.getElementById('updatesOverlay').style.display = 'none';
+        }
+    </script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         let socket;
@@ -2098,14 +2211,6 @@
         function showStarsPanel() {
             if (currentUser !== 'admin') return;
             document.getElementById('starsPanel').style.display = 'block';
-        }
-        
-        function showUpdatesPanel() {
-            document.getElementById('updatesPanel').style.display = 'block';
-        }
-        
-        function hideUpdatesPanel() {
-            document.getElementById('updatesPanel').style.display = 'none';
         }
         
         function hideStarsPanel() {
@@ -2754,6 +2859,23 @@
                 });
             }
         });
+        
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        // Показываем кнопку меню на мобильных
+        function checkMobile() {
+            if (window.innerWidth > 768) {
+                document.querySelector('.sidebar').classList.remove('open');
+                document.querySelector('.sidebar-overlay').classList.remove('show');
+            }
+        }
+        
+        window.addEventListener('resize', checkMobile);
         
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {

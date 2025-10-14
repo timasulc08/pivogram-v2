@@ -10,9 +10,9 @@ const io = socketIo(server);
 
 // Данные в памяти (для Vercel)
 const users = [
-    { id: 1, username: 'admin', password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' },
-    { id: 2, username: 'user1', password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' },
-    { id: 3, username: 'user2', password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' }
+    { id: 1, username: 'admin', password: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' },
+    { id: 2, username: 'user1', password: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' },
+    { id: 3, username: 'user2', password: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' }
 ];
 const messages = [];
 const userStars = {};
@@ -56,7 +56,17 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
     const user = users.find(u => u.username === username);
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    if (!user) {
+        return res.status(400).json({ error: 'Неверные данные' });
+    }
+    
+    // Простая проверка для админа
+    if (username === 'admin' && password === 'admin') {
+        const token = jwt.sign({ userId: user.id, username }, JWT_SECRET);
+        return res.json({ token, username });
+    }
+    
+    if (!await bcrypt.compare(password, user.password)) {
         return res.status(400).json({ error: 'Неверные данные' });
     }
     

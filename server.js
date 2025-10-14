@@ -4,37 +4,23 @@ const socketIo = require('socket.io');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const fs = require('fs');
-
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Загрузка данных из файла
-function loadData() {
-    try {
-        const data = fs.readFileSync('data.json', 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        return {
-            users: [
-                { id: 1, username: 'admin', password: '$2b$10$dummy' },
-                { id: 2, username: 'user1', password: '$2b$10$dummy' },
-                { id: 3, username: 'user2', password: '$2b$10$dummy' }
-            ],
-            messages: [],
-            userStars: {}
-        };
-    }
-}
+// Данные в памяти (для Vercel)
+const users = [
+    { id: 1, username: 'admin', password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' },
+    { id: 2, username: 'user1', password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' },
+    { id: 3, username: 'user2', password: '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' }
+];
+const messages = [];
+const userStars = {};
 
-// Сохранение данных в файл
+// Заглушки для совместимости
 function saveData() {
-    const data = { users, messages, userStars };
-    fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+    // В Vercel данные не сохраняются между запросами
 }
-
-const { users, messages, userStars = {} } = loadData();
 const privateMessages = new Map();
 const onlineUsers = new Map();
 
@@ -372,7 +358,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Сервер запущен на http://localhost:${PORT}`);
+    console.log(`Сервер запущен на порту ${PORT}`);
 });

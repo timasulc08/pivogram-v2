@@ -16,10 +16,7 @@ const users = [
 ];
 const messages = [];
 const userStars = {};
-<<<<<<< HEAD
 const starLinks = new Map(); // Храним ссылки на звезды
-=======
->>>>>>> 81d083bd1f5124259a83f24a4947cb65c8c22156
 
 // Заглушки для совместимости
 function saveData() {
@@ -478,22 +475,6 @@ io.on('connection', (socket) => {
         }
     });
     
-    // Обработчик раздачи звезд
-    socket.on('give_stars', (data) => {
-        if (!socket.username || socket.username !== 'admin') return;
-        
-        userStars[data.recipient] = (userStars[data.recipient] || 0) + data.amount;
-        saveData();
-        
-        const recipientSocketId = onlineUsers.get(data.recipient);
-        if (recipientSocketId) {
-            const recipientSocket = io.sockets.sockets.get(recipientSocketId);
-            if (recipientSocket) {
-                recipientSocket.emit('receive_stars', { amount: data.amount });
-            }
-        }
-    });
-    
     socket.on('disconnect', () => {
         if (socket.username) {
             onlineUsers.delete(socket.username);
@@ -509,155 +490,8 @@ io.on('connection', (socket) => {
         }
         console.log('Пользователь отключился');
     });
-
-    socket.on('incoming_call', async (data) => {
-    console.log('Incoming call from:', data.caller);
-        currentCall = data.caller;
-        
-        // Сохраняем offer для последующей обработки
-        window.incomingOffer = data.offer;
-        
-        showCallNotification(`📞 Входящий звонок от ${data.caller}`, 'incoming');
-    });
-
-    async function acceptCall() {
-        try {
-            // Запрашиваем и аудио, и видео
-            localStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: true, 
-                video: true 
-            });
-            
-            await createPeerConnection();
-            
-            // Добавляем все треки локального стрима
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-            });
-            
-            if (window.incomingOffer) {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(window.incomingOffer));
-                
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                
-                socket.emit('call_accepted', { 
-                    answer: answer,
-                    caller: currentCall 
-                });
-            }
-            
-            removeCallNotification();
-            showActiveCall(currentCall);
-            displaySystemMessage('📞 Звонок принят. Говорите!');
-            
-        } catch (error) {
-            console.error('Ошибка доступа к медиаустройствам:', error);
-            alert('Необходимо разрешить доступ к камере и микрофону');
-            rejectCall();
-        }
-    }
 });
 
-<<<<<<< HEAD
-function showActiveCall(username) {
-    const callOverlay = document.createElement('div');
-    callOverlay.className = 'call-overlay active-call';
-    callOverlay.innerHTML = `
-        <div class="call-interface">
-            <div class="video-container">
-                <video id="remoteVideo" autoplay playsinline></video>
-                <video id="localVideo" autoplay muted playsinline></video>
-                <div class="call-avatar" id="callAvatar">
-                    <div class="avatar-ring"></div>
-                    <div class="avatar-inner">${username ? username[0].toUpperCase() : '👤'}</div>
-                </div>
-            </div>
-            <div class="call-info">
-                <div class="caller-name">${username || 'Пользователь'}</div>
-                <div class="call-status">В эфире...</div>
-            </div>
-            <div class="call-controls">
-                <button class="call-btn camera" onclick="toggleCamera()" title="Камера">📹</button>
-                <button class="call-btn screen" onclick="toggleScreenShare()" title="Экран">🖥️</button>
-                <button class="call-btn end" onclick="endCall()">📞</button>
-            </div>
-        </div>
-    `;
-    
-    callOverlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(52, 199, 89, 0.2), rgba(0, 0, 0, 0.9));
-        z-index: 15000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: fadeIn 0.3s ease;
-    `;
-    
-    document.body.appendChild(callOverlay);
-    
-    // Показываем локальное видео сразу
-    const localVideo = document.getElementById('localVideo');
-    if (localVideo && localStream) {
-        localVideo.srcObject = localStream;
-        localVideo.style.display = 'block';
-    }
-    
-    // Ждем удаленное видео
-    setTimeout(() => {
-        const remoteVideo = document.getElementById('remoteVideo');
-        const callAvatar = document.getElementById('callAvatar');
-        
-        if (remoteVideo && remoteVideo.srcObject) {
-            remoteVideo.style.display = 'block';
-            if (callAvatar) callAvatar.style.display = 'none';
-        }
-    }, 1000);
-}
-
-async function startCall(username) {
-    console.log('Starting call to:', username);
-    
-    try {
-        // Запрашиваем и аудио, и видео
-        localStream = await navigator.mediaDevices.getUserMedia({ 
-            audio: true, 
-            video: true 
-        });
-        console.log('Медиаустройства разрешены');
-        
-        currentCall = username;
-        
-        await createPeerConnection();
-        
-        // Добавляем все треки локального стрима
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
-        
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        
-        socket.emit('call_request', { 
-            recipient: username,
-            offer: offer
-        });
-        
-        showCallNotification(`📞 Звоним ${username}...`, 'outgoing');
-        
-    } catch (error) {
-        console.error('Ошибка доступа к медиаустройствам:', error);
-        alert('Необходимо разрешить доступ к камере и микрофону');
-    }
-}
-
-=======
->>>>>>> 81d083bd1f5124259a83f24a4947cb65c8c22156
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);

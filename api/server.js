@@ -448,6 +448,67 @@ io.on('connection', (socket) => {
         }
     });
     
+    // Обновление цвета ника
+    socket.on('update_nick_color', (data) => {
+        if (socket.username === data.username) {
+            io.emit('nick_color_updated', data);
+        }
+    });
+    
+    // Отправка файлов
+    socket.on('send_file', (fileData) => {
+        if (!socket.username) return;
+        
+        const fileHTML = createFileHTML(fileData);
+        const message = {
+            id: Date.now(),
+            username: socket.username,
+            file: fileHTML,
+            time: new Date().toLocaleTimeString()
+        };
+        
+        messages.push(message);
+        io.emit('new_file', message);
+    });
+    
+    socket.on('private_file', (data) => {
+        if (!socket.username) return;
+        
+        const fileHTML = createFileHTML(data.file);
+        const message = {
+            id: Date.now(),
+            sender: socket.username,
+            recipient: data.recipient,
+            file: fileHTML,
+            time: new Date().toLocaleTimeString(),
+            isPrivate: true
+        };
+        
+        const recipientSocketId = onlineUsers.get(data.recipient);
+        if (recipientSocketId) {
+            const recipientSocket = io.sockets.sockets.get(recipientSocketId);
+            if (recipientSocket) {
+                recipientSocket.emit('private_file', message);
+            }
+        }
+        
+        const chatKey = [socket.username, data.recipient].sort().join('_');
+        if (!privateMessages.has(chatKey)) {
+            privateMessages.set(chatKey, []);
+        }
+        privateMessages.get(chatKey).push(message);
+    });
+    
+    function createFileHTML(fileData) {
+        if (fileData.type.startsWith('image/')) {
+            return `<img src="${fileData.data}" alt="${fileData.name}" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;" onclick="window.open('${fileData.data}', '_blank')">`;
+        } else if (fileData.type.startsWith('video/')) {
+            return `<video controls style="max-width: 300px; max-height: 200px; border-radius: 8px;"><source src="${fileData.data}" type="${fileData.type}"></video>`;
+        } else {
+            return `<a href="${fileData.data}" download="${fileData.name}" style="color: #7877c6; text-decoration: underline;">📎 ${fileData.name}</a>`;
+        }
+    }
+    
     // Обработчик подарков
     socket.on('send_gift', (giftData) => {
         console.log('Gift from:', socket.username, giftData);

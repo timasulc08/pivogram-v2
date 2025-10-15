@@ -3384,6 +3384,8 @@
                                     <button onclick="showUpdates()"
                                         style="padding: 8px 12px; background: rgba(0, 0, 0, 0.9); color: #7877c6; border: 1px solid #7877c6; border-radius: 0; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-family: 'Courier New', monospace;">📋
                                         Обновления</button>
+                                    <button id="colorBtn" onclick="showColorPanel()" style="display: none; padding: 8px 12px; background: rgba(0, 0, 0, 0.9); color: #ff77c6; border: 1px solid #ff77c6; border-radius: 0; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; font-family: 'Courier New', monospace; margin-left: 10px;">🎨
+                                        Цвет</button>
                                 </div>
                                 <div style="position: relative;">
                                     <button id="themeMenuBtn" onclick="toggleThemeMenu()"
@@ -3399,6 +3401,8 @@
                         
                         <div class="input-area" id="inputArea">
                             <button class="gift-btn" onclick="toggleGiftPanel()" title="Подарки">🎁</button>
+                            <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
+                            <button class="gift-btn" onclick="document.getElementById('fileInput').click()" title="Файл">📎</button>
                             <input id="messageInput" type="text" placeholder="Напишите сообщение..." maxlength="200">
                             <button class="send-btn" id="sendBtn" onclick="sendMessage()">🚀</button>
                         </div>
@@ -3463,6 +3467,28 @@
                             </div>
                         </div>
                         
+                        <!-- Панель смены цвета ника -->
+                        <div class="gift-panel" id="colorPanel" style="display: none;">
+                            <div class="gift-header">
+                                <h3>🎨 Цвет ника</h3>
+                                <button class="close-gift" onclick="hideColorPanel()">✕</button>
+                            </div>
+                            <div style="padding: 20px 24px;">
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                                    <div onclick="setNickColor('#ff6b35')" style="width: 60px; height: 60px; background: #ff6b35; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🔥</div>
+                                    <div onclick="setNickColor('#ff3b30')" style="width: 60px; height: 60px; background: #ff3b30; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">❤️</div>
+                                    <div onclick="setNickColor('#7877c6')" style="width: 60px; height: 60px; background: #7877c6; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💜</div>
+                                    <div onclick="setNickColor('#34c759')" style="width: 60px; height: 60px; background: #34c759; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💚</div>
+                                    <div onclick="setNickColor('#ff9500')" style="width: 60px; height: 60px; background: #ff9500; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🧡</div>
+                                    <div onclick="setNickColor('#007aff')" style="width: 60px; height: 60px; background: #007aff; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💙</div>
+                                </div>
+                                <div style="margin-top: 20px;">
+                                    <input type="color" id="customColor" style="width: 100%; height: 50px; border: none; border-radius: 12px; cursor: pointer;">
+                                    <button onclick="setNickColor(document.getElementById('customColor').value)" style="width: 100%; padding: 12px; background: #7877c6; color: white; border: none; border-radius: 12px; cursor: pointer; margin-top: 10px;">Применить цвет</button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Панель подарков -->
                         <div class="gift-panel" id="giftPanel" style="display: none;">
                             <div class="gift-header">
@@ -3510,6 +3536,7 @@
                             <button class="hammer-btn" onclick="startHammer()">🔨 Молот</button>
                             <button class="disco-btn" onclick="showStarsPanel()">⭐ Раздать звезды</button>
                             <button class="disco-btn" onclick="showLinkPanel()">🔗 Создать ссылку</button>
+                            <button class="disco-btn" onclick="showColorPanel()">🎨 Цвет ника</button>
                             <button class="disco-btn" onclick="showUpdates()">📋 Обновления</button>
                         </div>
                         
@@ -3785,6 +3812,12 @@
         }
         
         window.onload = function() {
+            // Загружаем цвета пользователей
+            const savedColors = localStorage.getItem('userColors');
+            if (savedColors) {
+                userColors = JSON.parse(savedColors);
+            }
+            
             // Проверяем ссылку на звезды
             const urlParams = new URLSearchParams(window.location.search);
             const stars = urlParams.get('stars');
@@ -3941,13 +3974,18 @@
             }
             updateStarsDisplay();
                 
-                // Показываем кнопку админа если пользователь admin
+                // Показываем кнопку админа только для admin
                 console.log('Current user:', currentUser);
                 if (currentUser === 'admin') {
                     console.log('Showing admin button');
                     document.getElementById('adminPanel').style.display = 'flex';
                 } else {
                     console.log('Not admin user, hiding button');
+                }
+                
+                // Показываем кнопку цвета для rusik и admin
+                if (currentUser === 'rusik' || currentUser === 'admin') {
+                    document.getElementById('colorBtn').style.display = 'inline-block';
                 }
                 
                 const messagesDiv = document.getElementById('messages');
@@ -4165,6 +4203,37 @@
             
             socket.on('star_link_error', (error) => {
                 displaySystemMessage(`❌ ${error}`);
+            });
+            
+            socket.on('nick_color_updated', (data) => {
+                userColors[data.username] = data.color;
+                localStorage.setItem('userColors', JSON.stringify(userColors));
+            });
+            
+            socket.on('new_file', (fileMessage) => {
+                if (activeChat === 'general') {
+                    displayMessage(fileMessage);
+                }
+                if (activeChat !== 'general') {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = createMessageHTML(fileMessage);
+                    generalMessages.push(tempDiv.innerHTML);
+                }
+            });
+            
+            socket.on('private_file', (data) => {
+                const chatKey = data.sender;
+                
+                if (!privateChats.has(chatKey)) {
+                    privateChats.set(chatKey, []);
+                    addPrivateChatToList(chatKey);
+                }
+                
+                privateChats.get(chatKey).push(data);
+                
+                if (activeChat === `private_${chatKey}`) {
+                    displayMessage(data);
+                }
             });
             
             // Убрали обработчик private_message_sent чтобы избежать дублирования
@@ -4429,13 +4498,19 @@
             users.forEach(user => {
                 if (user.username === currentUser) return;
                 
+                let displayName = user.username;
+                if (userColors[user.username]) {
+                    const color = userColors[user.username];
+                    displayName = `<span style="color: ${color}; font-weight: 700; text-shadow: 0 0 10px ${color}80;">${user.username}</span>`;
+                }
+                
                 const userItem = document.createElement('div');
                 userItem.className = 'user-item';
                 userItem.style.cursor = 'pointer';
                 userItem.onclick = () => openPrivateChat(user.username);
                 userItem.innerHTML = `
                     <div class="user-status ${user.online ? 'online' : 'offline'}"></div>
-                    <div class="user-name ${user.online ? '' : 'offline'}">${user.username}</div>
+                    <div class="user-name ${user.online ? '' : 'offline'}">${displayName}</div>
                 `;
                 usersList.appendChild(userItem);
             });
@@ -4475,6 +4550,98 @@
         
         function hideLinkPanel() {
             document.getElementById('linkPanel').style.display = 'none';
+        }
+        
+        function showColorPanel() {
+            if (currentUser !== 'admin' && currentUser !== 'rusik') return;
+            document.getElementById('colorPanel').style.display = 'block';
+        }
+        
+        function hideColorPanel() {
+            document.getElementById('colorPanel').style.display = 'none';
+        }
+        
+        let userColors = {
+            'rusik': '#ff6b35',
+            'admin': '#ff3b30'
+        };
+        
+        function setNickColor(color) {
+            if (currentUser !== 'admin' && currentUser !== 'rusik') return;
+            
+            userColors[currentUser] = color;
+            localStorage.setItem('userColors', JSON.stringify(userColors));
+            hideColorPanel();
+            
+            // Отправляем цвет на сервер
+            if (socket) {
+                socket.emit('update_nick_color', { username: currentUser, color: color });
+            }
+        }
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('Файл слишком большой. Максимальный размер: 10MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileData = {
+                    name: file.name,
+                    type: file.type,
+                    data: e.target.result,
+                    size: file.size
+                };
+                
+                sendFileMessage(fileData);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function sendFileMessage(fileData) {
+            if (!socket) return;
+            
+            const fileHTML = createFileHTML(fileData);
+            
+            if (activeChat.startsWith('private_')) {
+                const recipient = activeChat.replace('private_', '');
+                
+                const tempMessage = {
+                    sender: currentUser,
+                    recipient: recipient,
+                    file: fileHTML,
+                    time: new Date().toLocaleTimeString(),
+                    isPrivate: true
+                };
+                
+                if (!privateChats.has(recipient)) {
+                    privateChats.set(recipient, []);
+                }
+                privateChats.get(recipient).push(tempMessage);
+                displayMessage(tempMessage);
+                
+                socket.emit('private_file', {
+                    recipient: recipient,
+                    file: fileData
+                });
+            } else {
+                socket.emit('send_file', fileData);
+            }
+        }
+        
+        function createFileHTML(fileData) {
+            if (fileData.type.startsWith('image/')) {
+                return `<img src="${fileData.data}" alt="${fileData.name}" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;" onclick="window.open('${fileData.data}', '_blank')">`;
+            } else if (fileData.type.startsWith('video/')) {
+                return `<video controls style="max-width: 300px; max-height: 200px; border-radius: 8px;"><source src="${fileData.data}" type="${fileData.type}"></video>`;
+            } else {
+                return `<a href="${fileData.data}" download="${fileData.name}" style="color: #7877c6; text-decoration: underline;">📎 ${fileData.name}</a>`;
+            }
         }
         
         function createStarLink() {
@@ -4687,16 +4854,31 @@
             
             let className = 'message';
             let content = '';
+            let displayName = senderName;
+            
+            // Кастомные цвета для пользователей
+            if (userColors[senderName]) {
+                const color = userColors[senderName];
+                displayName = `<span style="color: ${color}; font-weight: 700; text-shadow: 0 0 10px ${color}80;">${senderName}</span>`;
+            }
             
             if (isAdminMessage) {
                 className = 'message admin';
-                content = `<strong>АДМИН</strong> <small>(${message.time})</small>: ${message.text}`;
+                content = `<strong>главный хуй</strong> <small>(${message.time})</small>: ${message.text}`;
             } else if (isOwnMessage) {
                 className = 'message own';
-                content = `${message.text} <small>(${message.time})</small>`;
+                if (message.file) {
+                    content = `${message.file} <small>(${message.time})</small>`;
+                } else {
+                    content = `${message.text} <small>(${message.time})</small>`;
+                }
             } else {
                 className = 'message';
-                content = `<strong>${senderName}</strong> <small>(${message.time})</small>: ${message.text}`;
+                if (message.file) {
+                    content = `<strong>${displayName}</strong> <small>(${message.time})</small>: ${message.file}`;
+                } else {
+                    content = `<strong>${displayName}</strong> <small>(${message.time})</small>: ${message.text}`;
+                }
             }
             
             return `<div class="${className}">${content}</div>`;

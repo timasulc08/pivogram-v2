@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
   "name": "messenger-app-v2",
   "version": "2.1.0",
+=======
+  "name": "messenger-app",
+  "version": "2.0.1",
+>>>>>>> 81d083bd1f5124259a83f24a4947cb65c8c22156
   "main": "api/server.js",
   "scripts": {
     "start": "node api/server.js"

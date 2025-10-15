@@ -16,7 +16,10 @@ const users = [
 ];
 const messages = [];
 const userStars = {};
+<<<<<<< HEAD
 const starLinks = new Map(); // Храним ссылки на звезды
+=======
+>>>>>>> 81d083bd1f5124259a83f24a4947cb65c8c22156
 
 // Заглушки для совместимости
 function saveData() {
@@ -556,6 +559,7 @@ io.on('connection', (socket) => {
     }
 });
 
+<<<<<<< HEAD
 function showActiveCall(username) {
     const callOverlay = document.createElement('div');
     callOverlay.className = 'call-overlay active-call';
@@ -652,6 +656,8 @@ async function startCall(username) {
     }
 }
 
+=======
+>>>>>>> 81d083bd1f5124259a83f24a4947cb65c8c22156
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
